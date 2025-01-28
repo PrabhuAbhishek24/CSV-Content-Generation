@@ -146,3 +146,9 @@ if query:
             file_name="medical_pharma_scorm.zip",
             mime="application/zip"
         )
+
+# Horizontal line
+st.markdown("---")
+
+# Footer
+st.caption("Developed by **Corbin Technology Solutions**")
