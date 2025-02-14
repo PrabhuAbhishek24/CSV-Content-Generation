@@ -29,6 +29,7 @@ def get_response(text):
 def fetch_medical_pharma_data(query):
     prompt = f"""
     Please provide reliable and accurate medical and pharmaceutical data related to the following query.
+    Dont answer to the queries or provide csv data related to any other domain. Fix the domain as Medical and pharmaceutical. 
     The data should include at least 15 to 20 entries and be formatted as a CSV for the medical and pharmaceutical domain only.
     The data must be accurate and trustworthy.
 
