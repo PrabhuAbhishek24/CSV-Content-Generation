@@ -93,7 +93,7 @@ st.set_page_config(page_title="CSV Content Generation", layout="wide", page_icon
 st.markdown(
     """
     <h1 style="text-align: center; font-size: 2.5rem; color: #4A90E2;">📚 AI-Powered CSV Content Generation</h1>
-    <p style="text-align: center; font-size: 1.1rem; color: #555;">Streamline your content creation process with AI technology. Designed for the <strong>pharmaceutical</strong> and <strong>medical</strong> domains.</p>
+    <p style="text-align: center; font-size: 1.1rem; color: #555;">Streamline your content creation process with AI technology.</p>
     """,
     unsafe_allow_html=True,
 )
