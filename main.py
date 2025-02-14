@@ -117,7 +117,7 @@ st.header("🔍 CSV Content Generation")
 
 # Text area for the user to enter the query
 query = st.text_area(
-    "Enter your medical or pharmaceutical query:",
+    "Enter your query:",
     height=200
 )
 
