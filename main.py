@@ -10,7 +10,7 @@ import zipfile
 import os
 from pathlib import Path
 import csv
-
+import pandas as pd
 openai.api_key = st.secrets["api"]["OPENAI_API_KEY"]
 
 
@@ -86,6 +86,15 @@ def create_scorm_package(csv_content):
     zip_buffer.seek(0)
     return zip_buffer
 
+# Function to convert CSV string to DataFrame
+def csv_to_dataframe(csv_string):
+    try:
+        df = pd.read_csv(io.StringIO(csv_string))
+        return df
+    except Exception as e:
+        return None  # Handle invalid CSV cases
+
+
 
 # Set up the page configuration (must be the first command)
 st.set_page_config(page_title="CSV Content Generation", layout="wide", page_icon="📚")
@@ -137,26 +146,36 @@ if domain:
             st.session_state.generated_response = fetch_gpt_response(domain, query)
             st.session_state.last_query = query  # Update last query
 
-        # Display the response
-        st.subheader("Response")
-        st.write(st.session_state.generated_response)
+        # Convert response to CSV format and display
+        csv_data = st.session_state.generated_response
+        df = csv_to_dataframe(csv_data)
 
-# Horizontal line before download options
-st.markdown("---")
+        if df is not None:
+            st.subheader("CSV Data Preview")
+            st.dataframe(df)  # Display CSV as table
 
-# Button to generate and download the CSV as a SCORM package
-if st.session_state.generated_response:  # Ensure there's a response before enabling the button
-    if st.button("Generate CSV File"):
-        # Generate the SCORM package from the response stored in session state
-        scorm_package = create_scorm_package(st.session_state.generated_response)
+            # Provide a button to download the CSV file
+            csv_buffer = io.StringIO()
+            df.to_csv(csv_buffer, index=False)
+            st.download_button(
+                label="Download CSV File",
+                data=csv_buffer.getvalue(),
+                file_name=f"{domain.lower().replace(' ', '_')}_data.csv",
+                mime="text/csv"
+            )
 
-        # Provide a download button for the SCORM package
-        st.download_button(
-            label="Download CSV File as SCORM Package",
-            data=scorm_package.getvalue(),
-            file_name=f"{domain.lower().replace(' ', '_')}_scorm.zip",
-            mime="application/zip"
-        )
+            # Button to generate and download the CSV as a SCORM package
+            if st.button("Generate SCORM Package"):
+                scorm_package = create_scorm_package(csv_data)
+
+                st.download_button(
+                    label="Download CSV File as SCORM Package",
+                    data=scorm_package.getvalue(),
+                    file_name=f"{domain.lower().replace(' ', '_')}_scorm.zip",
+                    mime="application/zip"
+                )
+        else:
+            st.warning("⚠ The generated response is not in a valid CSV format.")
 
 # Horizontal line
 st.markdown("---")
