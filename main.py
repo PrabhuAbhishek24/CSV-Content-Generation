@@ -27,19 +27,33 @@ def get_response(text):
 
 # Function to fetch medical and pharma-related data from GPT-3
 # Function to fetch data from GPT-3 based on domain and query
+
+# Function to fetch structured CSV data from GPT-3
 def fetch_gpt_response(domain, query):
     prompt = f"""
     Please provide reliable and accurate data related to the following query in the domain of {domain}.
     Don't answer queries or provide CSV data for any other domain except the one provided by the user.
-    The data should include at least 15 to 20 entries and be formatted as a CSV.
-    The data must be accurate and trustworthy.
-
+    The data should include at least 15 to 20 entries and be formatted as a proper CSV with headers and rows.
+    
+    The response **must** strictly follow this format:
+    
+    ```
+    Column1,Column2,Column3
+    Value1,Value2,Value3
+    Value4,Value5,Value6
+    ```
+    
+    Ensure that the output is structured properly as CSV without additional text, explanations, or formatting.
+    
     Query: {query}
-
-    The result should be in CSV format with headers and rows.
     """
     response = get_response(prompt)  # Fetch response from GPT-3
-    return response
+    return response.strip()
+
+
+
+
+
 
 # Function to create SCORM package
 def create_scorm_package(csv_content):
