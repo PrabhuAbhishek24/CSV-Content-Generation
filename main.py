@@ -26,20 +26,20 @@ def get_response(text):
 
 
 # Function to fetch medical and pharma-related data from GPT-3
-def fetch_medical_pharma_data(query):
+# Function to fetch data from GPT-3 based on domain and query
+def fetch_gpt_response(domain, query):
     prompt = f"""
-    Please provide reliable and accurate medical and pharmaceutical data related to the following query.
-    Dont answer to the queries or provide csv data related to any other domain. Fix the domain as Medical and pharmaceutical. 
-    The data should include at least 15 to 20 entries and be formatted as a CSV for the medical and pharmaceutical domain only.
+    Please provide reliable and accurate data related to the following query in the domain of {domain}.
+    Don't answer queries or provide CSV data for any other domain except the one provided by the user.
+    The data should include at least 15 to 20 entries and be formatted as a CSV.
     The data must be accurate and trustworthy.
 
     Query: {query}
 
     The result should be in CSV format with headers and rows.
     """
-    response = get_response(prompt)
+    response = get_response(prompt)  # Fetch response from GPT-3
     return response
-
 
 # Function to create SCORM package
 def create_scorm_package(csv_content):
@@ -116,35 +116,45 @@ st.markdown("---")
 
 st.header("🔍 CSV Content Generation")
 
-# Text area for the user to enter the query
-query = st.text_area(
-    "Enter your query:",
-    height=200
-)
+# User selects the domain first
+domain = st.text_input("Enter the domain in which the answer is required:", placeholder="Example: Medical, Pharmaceutical, Finance, etc.")
 
-# Check if the user has entered a query
-if query:
-    # Fetch the response using a function to generate data
-    response = fetch_medical_pharma_data(query)
+# Ensure session state exists for response storage
+if "generated_response" not in st.session_state:
+    st.session_state.generated_response = None
 
-    # Display the generated data in a text area
-    st.subheader("Generated Medical & Pharma Data (CSV format)")
-    st.text_area(
-        "Generated Data",
-        value=response,
-        height=300
+if domain:
+    query = st.text_area(
+        "Enter your query below:",
+        height=200,
+        placeholder=f"Enter any query related to the {domain} domain",
     )
+    
+    if query:
+        # Check if a new query has been entered
+        if query != st.session_state.get("last_query"):
+            # Fetch response and store in session state
+            st.session_state.generated_response = fetch_gpt_response(domain, query)
+            st.session_state.last_query = query  # Update last query
 
-    # Button to generate and download the CSV as a SCORM package
+        # Display the response
+        st.subheader("Response")
+        st.write(st.session_state.generated_response)
+
+# Horizontal line before download options
+st.markdown("---")
+
+# Button to generate and download the CSV as a SCORM package
+if st.session_state.generated_response:  # Ensure there's a response before enabling the button
     if st.button("Generate CSV File"):
-        # Generate the SCORM package from the response
-        scorm_package = create_scorm_package(response)
+        # Generate the SCORM package from the response stored in session state
+        scorm_package = create_scorm_package(st.session_state.generated_response)
 
         # Provide a download button for the SCORM package
         st.download_button(
             label="Download CSV File as SCORM Package",
             data=scorm_package.getvalue(),
-            file_name="medical_pharma_scorm.zip",
+            file_name=f"{domain.lower().replace(' ', '_')}_scorm.zip",
             mime="application/zip"
         )
 
